@@ -1,5 +1,4 @@
-// CDIB Definition 
-// (device-independent bitmap)
+///////////////////////////////////////////////////////////////////
 class CDIB
 {
     public:
@@ -19,3 +18,4 @@ class CDIB
     int             m_iHeight;      // Height of the DIB
     int             m_iSWidth;      // Storage Width (in bytes)
 };
+/* End of File */

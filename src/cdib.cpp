@@ -1,8 +1,10 @@
+//////////////////////////////////////////////////////////////////
 // CDIB - Small wrapper class to handle DIB`s
  
-// #include <windows.h> //Not using Windows, dev on unix
+#include <windows.h>
 #include "cdib.h"
-
+ 
+//////////////////////////////////////////////////////////////////
 CDIB::CDIB()
 {
     m_hdc = 0;
@@ -13,12 +15,13 @@ CDIB::CDIB()
     m_iHeight = 0;
     m_iSWidth = 0;
 }
-
+//////////////////////////////////////////////////////////////////
 CDIB::~CDIB()
 {
     Release();
 }
  
+//////////////////////////////////////////////////////////////////
 // Takes DC handle, creates a DIB from given location and size
 bool CDIB::Create(HDC hdcSrc, int iSrcX, int iSrcY,
                   int iWidth, int iHeight)
@@ -64,7 +67,7 @@ bool CDIB::Create(HDC hdcSrc, int iSrcX, int iSrcY,
     ReleaseDC(NULL, hdcScreen);
     return true;
 }
-
+//////////////////////////////////////////////////////////////////
 void CDIB::Release()
 {
     if(m_hdc)
@@ -86,3 +89,5 @@ void CDIB::Release()
     m_iWidth = 0;
     m_iHeight = 0;
 }
+//////////////////////////////////////////////////////////////////
+//End of File
