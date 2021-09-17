@@ -19,4 +19,3 @@ The objective of this project is to set up the environment that you will use to 
 4. Construct the roofline model of the machine platform that you use to evaluate thetarget computation. Then plot the performance of your target computation over the roofline model.  What does the roofline model tell you?  What is the performance bottleneck of the computation? Please submit your project report through Blackboard and be ready to present/demo your results in class.
 
 ## Resources:
-[1] S. Mortimer, “Fast Bitmap Rotation and Scaling,” Dr. Dobbs World of Software Development, Jul. 01, 2001. https://www.drdobbs.com/architecture-and-design/fast-bitmap-rotation-and-scaling/184416337 (accessed Sep. 01, 2021).
