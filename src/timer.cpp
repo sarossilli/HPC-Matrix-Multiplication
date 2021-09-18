@@ -28,7 +28,7 @@ double GetWallTime(void)
 
 /* Collect multiple timing samples */
 #ifndef MT
-#define MT 3
+#define MT 10
 #endif
 
 #ifndef RANDSEED
@@ -36,15 +36,18 @@ double GetWallTime(void)
 #endif
 /* Measure the collective performance of multiple invocations */
 #ifndef NREP
-#define NREP 10
+#define NREP 30
 #endif
 
 /* routine to measure performance of*/
-void test1(double * a,int N)
-;
+float test1(float*, float*,int );
 /* macro for the value of routien parameter */
-#ifndef SIZE
-#define SIZE 510
+#ifndef SIZE1
+#define SIZE1 150
+#endif
+/* macro for the value of routien parameter */
+#ifndef SIZE2
+#define SIZE2 20
 #endif
 
 int main(int argc, char **argv)
@@ -75,17 +78,26 @@ int main(int argc, char **argv)
   double __timer_begin, __timer_end;
 
   /* Declaring parameters of the routine */
-  double* a;
-  int N;
-  double* a_buf;
-  int a_size, a_rep;
+  float* A;
+  float* B;
+  int n;
+  int t;
+  float __pt_return;
+  float* A_buf;
+  int A_size, A_rep;
+  float* B_buf;
+  int B_size, B_rep;
 
   /* parameter initializations */
   srand(RANDSEED);
-  N = SIZE;
-  a_size=16*((15+(N*N+(1+N)))/16);
-  a_rep=CacheSZ / a_size + 1;
-  a_buf = (double*) calloc(a_size*a_rep, sizeof(double));
+  t = SIZE1;
+  n = t;
+  A_size=16*((15+n)/16);
+  A_rep=CacheSZ / A_size + 1;
+  A_buf = (float*) calloc(A_size*A_rep, sizeof(float));
+  B_size=16*((15+n)/16);
+  B_rep=CacheSZ / B_size + 1;
+  B_buf = (float*) calloc(B_size*B_rep, sizeof(float));
   #define DO_FLUSH 1
   __pt_flush_buffer = (double*) malloc(CacheSZ * sizeof(double));
 
@@ -96,11 +108,16 @@ int main(int argc, char **argv)
   /* Multiple Timings */
   for (__pt_MT_ivar=0; __pt_MT_ivar<MT; ++__pt_MT_ivar) {
     srand(RANDSEED);
-    for (__pt_i0=0; __pt_i0<a_size *a_rep; ++__pt_i0)
+    for (__pt_i0=0; __pt_i0<A_size *A_rep; ++__pt_i0)
     {
-      a_buf[__pt_i0] = rand();;
+      A_buf[__pt_i0] = rand();;
     }
-    a = a_buf;
+    A = A_buf;
+    for (__pt_i0=0; __pt_i0<B_size *B_rep; ++__pt_i0)
+    {
+      B_buf[__pt_i0] = rand();;
+    }
+    B = B_buf;
     /* code to flush the cache */
     __pt_flush_bufferVal = 0;
     for (__pt_i0=0; __pt_i0 < CacheSZ; ++__pt_i0)
@@ -111,10 +128,13 @@ int main(int argc, char **argv)
     __timer_begin = GetWallTime();
     /* Timing loop */
     for (__pt_NREP_ivar=0; __pt_NREP_ivar<NREP; ++__pt_NREP_ivar) {
-      test1 (a,N);
-      if (__pt_i0 < a_rep-1)
-        a += a_size;
-      else a = a_buf;
+      __pt_return= test1(A,B,n);
+      if (__pt_i0 < A_rep-1)
+        A += A_size;
+      else A = A_buf;
+      if (__pt_i0 < B_rep-1)
+        B += B_size;
+      else B = B_buf;
     }
     /* Timer end */
     __timer_end = GetWallTime();
@@ -122,6 +142,8 @@ int main(int argc, char **argv)
     __timer_diff[__pt_MT_ivar] = (__timer_end-__timer_begin)/NREP;
   }
   /* flops of computation */
+  __pt_flops = n*n*n;
+
   /* Compute minimum of multiple timings */
   __timer_min=__timer_diff[0];
   __timer_max=__timer_diff[0];
@@ -146,5 +168,20 @@ int main(int argc, char **argv)
   printf("Minimum time in seconds:  %.15f\n", __timer_min);
   printf("Maximum time in seconds:  %.15f\n", __timer_max);
   printf("Average time in seconds:  %.15f\n", __timer_avg);
+  printf("Maximum MFLOPS: %.15f\n", __pt_flops/__timer_min/1000000);
+  printf("Minimum MFLOPS: %.15f\n", __pt_flops/__timer_max/1000000);
+  printf("Average MFLOPS: %.15f\n", __pt_flops/__timer_avg/1000000);
+  printf("Configuration\n"
+         "-------------\n");
+  printf("Cache Size: %d\n", CS);
+  #ifdef DO_FLUSH
+  printf("Cache Flush Method: generic\n");
+  #else
+  printf("Cache Flush Method: none\n");
+  #endif
+  printf("ARCH: generic\n");
+  printf("nrep: %d\n", NREP);
+  printf("mt: %d\n", MT);
+  printf("Random Seed: %d\n", RANDSEED);
   return(0);
 }
