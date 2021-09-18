@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     __timer_diff[__pt_MT_ivar] = (__timer_end-__timer_begin)/NREP;
   }
   /* flops of computation */
-  __pt_flops = n*n*n;
+  __pt_flops = 2*n*n*n;
 
   /* Compute minimum of multiple timings */
   __timer_min=__timer_diff[0];
