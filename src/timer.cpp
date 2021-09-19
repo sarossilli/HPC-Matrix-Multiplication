@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include <stdio.h>
+#include <iostream>
+using namespace std;
 #ifndef CS
-#define CS 1000
+#define CS 8
 #endif
-#define CacheSZ CS*1024/sizeof(double)
+#define CacheSZ CS*1024/sizeof(float)
 
 
 #include <stdlib.h>
@@ -28,7 +30,7 @@ double GetWallTime(void)
 
 /* Collect multiple timing samples */
 #ifndef MT
-#define MT 10
+#define MT 3
 #endif
 
 #ifndef RANDSEED
@@ -36,18 +38,18 @@ double GetWallTime(void)
 #endif
 /* Measure the collective performance of multiple invocations */
 #ifndef NREP
-#define NREP 30
+#define NREP 3
 #endif
 
 /* routine to measure performance of*/
 float test1(float*, float*,int );
 /* macro for the value of routien parameter */
 #ifndef SIZE1
-#define SIZE1 150
+#define SIZE1 1000
 #endif
 /* macro for the value of routien parameter */
 #ifndef SIZE2
-#define SIZE2 20
+#define SIZE2 10
 #endif
 
 int main(int argc, char **argv)
@@ -65,8 +67,8 @@ int main(int argc, char **argv)
   int __pt_NREP_ivar;
 
   /* variables to support cache flushing */
-  double* __pt_flush_buffer;
-  double __pt_flush_bufferVal;
+  float* __pt_flush_buffer;
+  float __pt_flush_bufferVal;
 
   /* variable for computing MFLOPS */
   double __pt_flops;
@@ -84,27 +86,32 @@ int main(int argc, char **argv)
   int t;
   float __pt_return;
   float* A_buf;
-  int A_size, A_rep;
+  long A_size, A_rep;
   float* B_buf;
-  int B_size, B_rep;
+  long B_size, B_rep;
 
   /* parameter initializations */
   srand(RANDSEED);
   t = SIZE1;
-  n = t;
-  A_size=16*((15+n)/16);
-  A_rep=CacheSZ / A_size + 1;
+  n = SIZE1;
+  cout << n << endl;
+  A_size=n*n*sizeof(float);
+  A_rep= CacheSZ / A_size + 1;
   A_buf = (float*) calloc(A_size*A_rep, sizeof(float));
-  B_size=16*((15+n)/16);
-  B_rep=CacheSZ / B_size + 1;
+  B_size=n*n*sizeof(float);
+
+
+  
+  B_rep= CacheSZ / B_size + 1;
   B_buf = (float*) calloc(B_size*B_rep, sizeof(float));
   #define DO_FLUSH 1
-  __pt_flush_buffer = (double*) malloc(CacheSZ * sizeof(double));
+  __pt_flush_buffer = (float*) malloc(CacheSZ * sizeof(float));
 
+ 
   for(__pt_i0=0; __pt_i0 < CacheSZ; ++__pt_i0) {
     __pt_flush_buffer[__pt_i0] = ((__pt_i0 % 3) == 2) ? -1 : __pt_i0 % 2;
   }
-
+  
   /* Multiple Timings */
   for (__pt_MT_ivar=0; __pt_MT_ivar<MT; ++__pt_MT_ivar) {
     srand(RANDSEED);
@@ -125,6 +132,7 @@ int main(int argc, char **argv)
     assert(__pt_flush_bufferVal < 10);
 
     /* Timer start */
+    
     __timer_begin = GetWallTime();
     /* Timing loop */
     for (__pt_NREP_ivar=0; __pt_NREP_ivar<NREP; ++__pt_NREP_ivar) {
@@ -135,12 +143,15 @@ int main(int argc, char **argv)
       if (__pt_i0 < B_rep-1)
         B += B_size;
       else B = B_buf;
+
+      
     }
     /* Timer end */
     __timer_end = GetWallTime();
     /* result of a single timing */
     __timer_diff[__pt_MT_ivar] = (__timer_end-__timer_begin)/NREP;
   }
+  
   /* flops of computation */
   __pt_flops = 2*n*n*n;
 
